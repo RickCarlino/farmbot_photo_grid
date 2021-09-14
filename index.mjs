@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 import express from 'express';
-import { Farmbot } from 'farmbot';
+import { Farmbot, uuid } from 'farmbot';
 import atob from "atob";
 import { readFileSync, writeFileSync } from 'fs';
 import { networkInterfaces } from 'os';
@@ -24,10 +24,6 @@ console.log("I will assume the first one is correct.")
 console.dir(ip_addresses);
 
 global.atob = atob;
-async function getIP() {
-  const { data } = await axios.get('https://api.ipify.org/')
-  return data;
-}
 
 function readFile(path) {
   return new TextDecoder().decode(readFileSync(path)).trim();
@@ -35,7 +31,6 @@ function readFile(path) {
 
 const token = readFile("./token");
 const fb = new Farmbot({ token });
-const ip = await getIP();
 const app = express();
 const port = 4567;
 const server_address = `http://${ip_addresses[0]}:${port}/photo`;
@@ -58,7 +53,7 @@ await fb.connect();
 fb.send({
   kind: "rpc_request",
   args: {
-    label: "fsdfsdf",
+    label: uuid(),
     priority: 100
   },
   body: [
