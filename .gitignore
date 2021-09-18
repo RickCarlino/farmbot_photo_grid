@@ -1,3 +1,4 @@
 token
 *.jpg
 node_modules/
+scratchpad*
