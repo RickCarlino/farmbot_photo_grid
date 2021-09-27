@@ -1,8 +1,8 @@
-start_x = 400
-start_y = 400
-end_x = 500
-end_y = 500
-step_size = 10
+start_x = 0
+start_y = 0
+end_x = 2000
+end_y = 2200
+step_size = 100
 
 function work(x, y)
     move_absolute(x, y, 0)
@@ -13,7 +13,7 @@ function work(x, y)
         -- See `index.mjs` (towards the bottom)
         url = server_address,
         method = "POST",
-        -- IMORTANT: The `file_ath` HTTP header is used by
+        -- IMORTANT: The `file_path` HTTP header is used by
         -- the server in `index.mjs` to set a file name on
         -- the server.
         headers = {file_path = (x .. "." .. y .. ".jpg")},
