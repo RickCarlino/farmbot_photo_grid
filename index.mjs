@@ -1,5 +1,3 @@
-
-import axios from 'axios';
 import express from 'express';
 import { Farmbot, uuid } from 'farmbot';
 import atob from "atob";
@@ -56,7 +54,7 @@ app.use(express.raw({ limit: "99mb" }))
 // Put the filename in an HTTP header named `file_path`.
 // See grid.lua for more information.
 app.post('/photo', (req, res) => {
-  writeFileSync("photos/" + req.headers["file_path"], req.body);
+  writeFileSync("photos_with_z/" + req.headers["file_path"], req.body);
   console.log("Got a post request.");
   res.send("OK");
   res.end();
