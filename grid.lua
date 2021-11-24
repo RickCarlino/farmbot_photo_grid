@@ -1,11 +1,11 @@
-start_x = 200
-start_y = 200
-end_x = 1800
-end_y = 2000
-step_size = 100
+start_x = 200 + 20
+start_y = 200 + 10
+end_x = 1800 - 10
+end_y = 1900 - 10
+step_size = 10
+local count = json.decode(env("LAST_COUNT") or "0")
 
 function round(a) return math.floor(a + 0.5) end
-
 function work(x, y)
     move_absolute(x, y, 0)
     write_pin(7, "digital", 1)
@@ -29,15 +29,24 @@ function work(x, y)
     })
     return error
 end
-
+local i = 0
 for y = start_y, end_y, step_size do
     for x = start_x, end_x, step_size do
+        i = i + 1
         if read_status("informational_settings", "locked") then
             send_message("error", "Halting execution", "toast")
             return
         else
-            error = work(x, y)
-            if error then return end
+            if i > count then
+                collectgarbage()
+                error = work(x, y)
+                if not error then
+                    count = count + 1
+                    env("LAST_COUNT", "" .. count)
+                end
+            end
         end
     end
 end
+
+env("LAST_COUNT", "" .. 0)
