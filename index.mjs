@@ -1,7 +1,7 @@
 import express from 'express';
 import { Farmbot, uuid } from 'farmbot';
 import atob from "atob";
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, appendFileSync } from 'fs';
 import { networkInterfaces } from 'os';
 
 global.atob = atob;
@@ -46,6 +46,7 @@ const app = express();
 const port = 4567;
 // If you want to hard code your server's IP address, do it here:
 const server_address = `http://${ip_addresses[0]}:${port}/photo`;
+const tof_address = `http://${ip_addresses[0]}:${port}/tof`;
 
 // Configure Express to allow very large file uploads (photos)
 app.use(express.raw({ limit: "99mb" }))
@@ -55,6 +56,14 @@ app.use(express.raw({ limit: "99mb" }))
 // See grid.lua for more information.
 app.post('/photo', (req, res) => {
   writeFileSync("photo_with_z_hi_res/" + req.headers["file_path"], req.body);
+  console.log("Got a post request.");
+  res.send("OK");
+  res.end();
+});
+
+// Post a time-of-flight reading
+app.post('/tof', (req, res) => {
+  appendFileSync("time_of_flight.xyz", req.body);
   console.log("Got a post request.");
   res.send("OK");
   res.end();
@@ -85,6 +94,7 @@ fb.send({
       args: {
         lua: `
         server_address = "${server_address}"
+        tof_address = "${tof_address}"
         ${readFile("./grid.lua")}
         `
       }
@@ -92,6 +102,7 @@ fb.send({
   ]
 }).then(() => { }, () => {
   console.error("RPC ERROR");
+  process.exit(1);
 });
 
 app.listen(port, () => {

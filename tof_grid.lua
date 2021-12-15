@@ -1,36 +1,42 @@
+local DEPTH_APARATUS_URL = "http://192.168.1.100:8888"
 start_x = 200 + 20
 start_y = 200 + 10
 end_x = 1800 - 10
 end_y = 1900 - 10
-step_size = 20
+step_size = 10
 local KEY = "LAST_COUNT"
 local count = json.decode(env(KEY) or "0")
 
 function round(a) return math.floor(a + 0.5) end
+
+function get_tof()
+    local params = {method = "GET", url = DEPTH_APARATUS_URL}
+    local data, error = http(params)
+    if error then
+        os.exit()
+    else
+        return round(json.decode(data.body))
+    end
+end
+
 function work(x, y)
     move_absolute(x, y, 0)
-    write_pin(7, "digital", 1)
-    -- Raw binary data to directly upload to the server:
-    local data = take_photo_raw()
     local p = get_position()
     local real_x = round(p.x)
     local real_y = round(p.y)
-    local real_z = round(soil_height(real_x, real_y))
-    local path = "" .. real_x .. "." .. real_y .. "." .. real_z .. ".jpg"
+    local real_z = get_tof()
+    local body = "" .. real_x .. " " .. real_y .. " " .. real_z .. "\n"
     response, error = http({
-        -- `server_address` is set dynamically via NodeJS
-        -- See `index.mjs` (towards the bottom)
-        url = server_address,
+        url = tof_address,
         method = "POST",
-        -- IMORTANT: The `file_path` HTTP header is used by
-        -- the server in `index.mjs` to set a file name on
-        -- the server.
-        headers = {file_path = path},
-        body = data
+        headers = {},
+        body = body
     })
     return error
 end
+
 local i = 0
+
 for y = start_y, end_y, step_size do
     for x = start_x, end_x, step_size do
         i = i + 1
